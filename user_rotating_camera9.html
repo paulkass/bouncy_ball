@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html> 
+  <head> 
+    <title>My first Three.js app</title> 
+    <style>canvas { width: 100%; height: 100% }</style> 
+  </head> 
+  <body> 
+    <script src="js/three.min.js"></script> 
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" ></script>
+    <script> 
+    
+      var theta = 0;
+      var ztheta = 0;
+      var radius = 5;
+    
+      $(document).ready(function(){
+        //Firefox
+        $(document).bind('DOMMouseWheel', function(event){
+          if(event.originalEvent.detail > 0) {
+            //scroll down
+            radius += event.originalEvent.detail/2;
+          }else {
+            //scroll up
+            radius -= event.originalEvent.detail/2;
+          }
+          return false;
+        });
+        // Webkit
+        /*$(document).bind('mousewheel', function(event){
+          if(event.originalEvent.wheelDelta > 0) {
+            //scroll down
+            radius += event.originalEvent.wheelDelta/2;
+          }else {
+            //scroll up
+            radius -= event.originalEvent.wheelDelta/2;
+          }
+          event.preventDefault();
+        }); */
+        
+        $(document).keydown(function(event){
+          event.preventDefault();
+          //alert(camera.position.x+" "+camera.position.y+" "+camera.position.z);
+          switch (event.which) {
+          	case 37:
+          	  theta -= (1/60);
+          	break;
+          	case 38: 
+          	  ztheta += (1/60);
+          	break;
+          	case 39:
+          	  theta += (1/60);
+          	break;
+          	case 40:
+          	  ztheta -= (1/60);
+          	break;
+          }
+        });
+      });
+  
+      
+      var scene = new THREE.Scene(); 
+      var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 ); 
+      
+      var renderer = new THREE.WebGLRenderer(); 
+      renderer.setSize( window.innerWidth, window.innerHeight ); 
+      document.body.appendChild( renderer.domElement ); 
+      
+      var planegeo = new THREE.PlaneGeometry(100,100);
+      var geomaterial = new THREE.MeshBasicMaterial({color: "gray", side: THREE.DoubleSide});
+      var plane = new THREE.Mesh(planegeo, geomaterial);
+      plane.rotation.x += 90;
+      plane.position.z = -2;
+      scene.add(plane);
+      
+      var light = new THREE.PointLight( "yellow");
+      var light2 = new THREE.PointLight("yellow");
+      light.position.set(-10, -2, 0);
+      light2.position.set(0, -10, 0);
+      scene.add(light);
+      scene.add(light2);
+      
+      var sphereParent = new THREE.Object3D();
+      var geometry = new THREE.SphereGeometry(1, 100, 100);
+      var material = new THREE.MeshPhongMaterial( {color: "yellow", shininess: 100});
+      var circle = new THREE.Mesh(geometry, material);
+      sphereParent.add(circle);
+      sphereParent.position.set(0,3,0);
+      scene.add(sphereParent);
+      
+      
+      
+      radius = 5;
+      var v = new THREE.Vector3(0, 0,0);
+      var x = -5;
+      
+      function calcExp(x, m, b) {
+      	return 2*Math.exp(-b*x/(2*m))*Math.cos(Math.sqrt(Math.pow(Math.PI, 2)-Math.pow(b, 2)/(4*Math.pow(m, 2)))*x);
+      }
+      
+      //setInterval(function(){ alert(camera.position.x+" "+camera.position.y+" "+camera.position.z); }, 10000);
+      
+      function render() {
+      	requestAnimationFrame(render);
+      	
+      	var a = radius*Math.sin(90-ztheta);
+      	camera.position.y = radius*Math.sin(ztheta);
+      	camera.position.x = a*Math.sin(theta);
+      	camera.position.z = a*Math.sin(90-theta);
+      	camera.lookAt(v);
+  
+        x += (1/60);
+
+        if (calcExp(x, 0.56, 0.24621102)<0) {
+        	sphereParent.position.y = calcExp(x+1, 0.56, 0.24621102);
+        }
+        else {
+        	sphereParent.position.y = calcExp(x, 0.56, 0.24621102);
+        }
+        //v = new THREE.Vector3(sphereParent.position.x, sphereParent.position.y, sphereParent.position.z);
+
+      	renderer.render(scene, camera);
+      }
+      render();
+    </script> 
+  </body> 
+</html>
